@@ -110,5 +110,14 @@ class TicketServiceTest {
 			ticketService.purchaseTickets(accountId, request);
 		});
 	}
+	
+	@Test
+	public void testAccountIdValidation() {
+		Long accountId = 0L;
+		TicketTypeRequest request = new TicketTypeRequest(Type.ADULT, 20);
+		assertThrows(InvalidPurchaseException.class, () -> {
+			ticketService.purchaseTickets(accountId, request);
+		});
+	}
 
 }

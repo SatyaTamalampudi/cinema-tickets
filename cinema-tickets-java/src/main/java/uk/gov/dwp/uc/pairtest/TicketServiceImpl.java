@@ -24,6 +24,7 @@ public class TicketServiceImpl implements TicketService {
 	@Override
 	public void purchaseTickets(Long accountId, TicketTypeRequest... ticketTypeRequests)
 			throws InvalidPurchaseException {
+		isValidAccountId(accountId);
 		boolean adultTicketFound = false;
 		int totalTickets = Arrays.stream(ticketTypeRequests).mapToInt(TicketTypeRequest::getNoOfTickets).sum();
 		int numInfants = 0;
@@ -66,5 +67,11 @@ public class TicketServiceImpl implements TicketService {
 			return 0;
 		}
 	}
+	
+	private void isValidAccountId(Long accountId) {
+	    if (accountId <= 0) {
+	     throw new InvalidPurchaseException("Invalid account number");
+	    }
+	  }
 
 }
