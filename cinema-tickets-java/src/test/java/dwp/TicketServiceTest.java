@@ -66,5 +66,17 @@ class TicketServiceTest {
 	        ticketService.purchaseTickets(accountId, childRequest, infantRequest);
 	    });
 	}
+	
+	@Test
+	public void testCalculateAmountAndMakePayment() {
+	    Long accountId = 123L;
+	    TicketTypeRequest adultRequest = new TicketTypeRequest(Type.ADULT, 2);
+	    TicketTypeRequest childRequest = new TicketTypeRequest(Type.CHILD, 1);
+	    TicketTypeRequest infantRequest = new TicketTypeRequest(Type.INFANT, 1);
+	    int totalAmount = 2 * 20 + 1 * 10 + 1 * 0;
+	    ticketService.purchaseTickets(accountId, adultRequest, childRequest, infantRequest);
+	    verify(ticketPaymentService).makePayment(accountId, totalAmount);
+	}
+
 
 }
