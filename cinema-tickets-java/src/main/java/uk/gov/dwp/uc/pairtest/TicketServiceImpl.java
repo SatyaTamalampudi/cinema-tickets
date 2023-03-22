@@ -4,6 +4,7 @@ import java.util.Arrays;
 
 import thirdparty.paymentgateway.TicketPaymentService;
 import uk.gov.dwp.uc.pairtest.domain.TicketTypeRequest;
+import uk.gov.dwp.uc.pairtest.domain.TicketTypeRequest.Type;
 import uk.gov.dwp.uc.pairtest.exception.InvalidPurchaseException;
 
 public class TicketServiceImpl implements TicketService {
@@ -20,7 +21,18 @@ public class TicketServiceImpl implements TicketService {
 	@Override
 	public void purchaseTickets(Long accountId, TicketTypeRequest... ticketTypeRequests)
 			throws InvalidPurchaseException {
-		int totalTickets = Arrays.stream(ticketTypeRequests).mapToInt(TicketTypeRequest::getNoOfTickets).sum();
+		boolean adultTicketFound = false;
+		int totalTickets = 0;
+		for (TicketTypeRequest request : ticketTypeRequests) {
+			if (request.getTicketType() == Type.ADULT) {
+				adultTicketFound = true;
+			}
+			totalTickets += request.getNoOfTickets();
+		}
+		if (!adultTicketFound) {
+			throw new InvalidPurchaseException(
+					"At least one Adult ticket is required to purchase Child or Infant tickets.");
+		}
 		if (totalTickets > 20) {
 			throw new InvalidPurchaseException("Maximum of 20 tickets can be purchased at a time.");
 		}

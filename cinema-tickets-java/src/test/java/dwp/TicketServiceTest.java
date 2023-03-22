@@ -57,5 +57,14 @@ class TicketServiceTest {
 	    });
 	   	}
 
+	@Test
+	public void testChildAndInfantWithoutAdult() {
+	    Long accountId = 123L;
+	    TicketTypeRequest childRequest = new TicketTypeRequest(Type.CHILD, 5);
+	    TicketTypeRequest infantRequest = new TicketTypeRequest(Type.INFANT, 8);
+	    assertThrows(InvalidPurchaseException.class, () -> {
+	        ticketService.purchaseTickets(accountId, childRequest, infantRequest);
+	    });
+	}
 
 }
