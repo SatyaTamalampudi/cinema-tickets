@@ -1,7 +1,10 @@
 package dwp;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -37,13 +40,22 @@ class TicketServiceTest {
 	@Test
 	public void testMaxTicketLimit() {
 		Long accountId = 123L;
-		TicketTypeRequest[] requests = new TicketTypeRequest[25];
-		for (int i = 0; i < 25; i++) {
-			requests[i] = new TicketTypeRequest(Type.ADULT, 1);
-		}
+		TicketTypeRequest request = new TicketTypeRequest(Type.ADULT, 25);
 		assertThrows(InvalidPurchaseException.class, () -> {
-			ticketService.purchaseTickets(accountId, requests);
+			ticketService.purchaseTickets(accountId, request);
 		});
 	}
+	
+	@Test
+	public void testMultipleRequestPayment() {
+	    Long accountId = 123L;
+	    TicketTypeRequest adultRequest = new TicketTypeRequest(Type.ADULT, 10);
+	    TicketTypeRequest childRequest = new TicketTypeRequest(Type.CHILD, 5);
+	    TicketTypeRequest infantRequest = new TicketTypeRequest(Type.INFANT, 8);
+	    assertThrows(InvalidPurchaseException.class, () -> {
+	        ticketService.purchaseTickets(accountId, adultRequest, childRequest, infantRequest);
+	    });
+	   	}
+
 
 }
