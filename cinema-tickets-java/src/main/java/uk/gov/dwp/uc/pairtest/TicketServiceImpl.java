@@ -24,23 +24,19 @@ public class TicketServiceImpl implements TicketService {
 	@Override
 	public void purchaseTickets(Long accountId, TicketTypeRequest... ticketTypeRequests)
 			throws InvalidPurchaseException {
+		
 		isValidAccountId(accountId);
 		boolean adultTicketFound = false;
 		int totalTickets = Arrays.stream(ticketTypeRequests).mapToInt(TicketTypeRequest::getNoOfTickets).sum();
-		int numInfants = 0;
-		int totalAmount = 0;
+		int totalAmount = Arrays.stream(ticketTypeRequests).mapToInt(TicketTypeRequest::getTotalPrice).sum();
+		int totalSeats = Arrays.stream(ticketTypeRequests).mapToInt(TicketTypeRequest::getTotalSeats).sum();
 
 		for (TicketTypeRequest request : ticketTypeRequests) {
 			if (request.getTicketType() == Type.ADULT) {
 				adultTicketFound = true;
 			}
-			if (request.getTicketType() == Type.INFANT) {
-				numInfants += 1;
-			}
-
-			totalAmount += request.getNoOfTickets() * getPrice(request.getTicketType());
 		}
-		int numSeats = totalTickets - numInfants;
+
 		if (!adultTicketFound) {
 			throw new InvalidPurchaseException(
 					"At least one Adult ticket is required to purchase Child or Infant tickets.");
@@ -48,30 +44,18 @@ public class TicketServiceImpl implements TicketService {
 		if (totalTickets > 20) {
 			throw new InvalidPurchaseException("Maximum of 20 tickets can be purchased at a time.");
 		}
-		if (numSeats > 20) {
+		if (totalSeats > 20) {
 			throw new InvalidPurchaseException("Maximum of 20 seats can be reserved at a time.");
 		}
+
 		ticketPaymentService.makePayment(accountId, totalAmount);
-		seatReservationService.reserveSeat(accountId, numSeats);
+		seatReservationService.reserveSeat(accountId, totalSeats);
 	}
 
-	private int getPrice(Type type) {
-		switch (type) {
-		case INFANT:
-			return 0;
-		case CHILD:
-			return 10;
-		case ADULT:
-			return 20;
-		default:
-			return 0;
+	private void isValidAccountId(Long accountId) {
+		if (accountId <= 0) {
+			throw new InvalidPurchaseException("Invalid account number");
 		}
 	}
-	
-	private void isValidAccountId(Long accountId) {
-	    if (accountId <= 0) {
-	     throw new InvalidPurchaseException("Invalid account number");
-	    }
-	  }
 
 }
