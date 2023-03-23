@@ -26,6 +26,7 @@ public class TicketServiceImpl implements TicketService {
 			throws InvalidPurchaseException {
 		
 		isValidAccountId(accountId);
+		
 		boolean adultTicketFound = false;
 		int totalTickets = Arrays.stream(ticketTypeRequests).mapToInt(TicketTypeRequest::getNoOfTickets).sum();
 		int totalAmount = Arrays.stream(ticketTypeRequests).mapToInt(TicketTypeRequest::getTotalPrice).sum();
@@ -54,7 +55,7 @@ public class TicketServiceImpl implements TicketService {
 
 	private void isValidAccountId(Long accountId) {
 		if (accountId <= 0) {
-			throw new InvalidPurchaseException("Invalid account number");
+			throw new InvalidPurchaseException("Invalid account number. AccountId should be greater than 0.");
 		}
 	}
 

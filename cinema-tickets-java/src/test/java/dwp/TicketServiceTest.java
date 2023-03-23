@@ -1,11 +1,6 @@
 package dwp;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import org.junit.jupiter.api.Test;
@@ -42,15 +37,6 @@ class TicketServiceTest {
 	}
 
 	@Test
-	public void testMaxTicketLimit() {
-		Long accountId = 123L;
-		TicketTypeRequest request = new TicketTypeRequest(Type.ADULT, 25);
-		assertThrows(InvalidPurchaseException.class, () -> {
-			ticketService.purchaseTickets(accountId, request);
-		});
-	}
-
-	@Test
 	public void testMultipleRequestPayment() {
 		Long accountId = 123L;
 		TicketTypeRequest adultRequest = new TicketTypeRequest(Type.ADULT, 10);
@@ -58,6 +44,15 @@ class TicketServiceTest {
 		TicketTypeRequest infantRequest = new TicketTypeRequest(Type.INFANT, 8);
 		assertThrows(InvalidPurchaseException.class, () -> {
 			ticketService.purchaseTickets(accountId, adultRequest, childRequest, infantRequest);
+		});
+	}
+
+	@Test
+	public void testMaxTicketLimit() {
+		Long accountId = 123L;
+		TicketTypeRequest request = new TicketTypeRequest(Type.ADULT, 25);
+		assertThrows(InvalidPurchaseException.class, () -> {
+			ticketService.purchaseTickets(accountId, request);
 		});
 	}
 
@@ -80,6 +75,23 @@ class TicketServiceTest {
 		int totalAmount = 2 * 20 + 1 * 10 + 1 * 0;
 		ticketService.purchaseTickets(accountId, adultRequest, childRequest, infantRequest);
 		verify(ticketPaymentService).makePayment(accountId, totalAmount);
+	}
+
+	@Test
+	public void testAdultReserveOneSeat() {
+		Long accountId = 123L;
+		TicketTypeRequest request = new TicketTypeRequest(Type.ADULT, 1);
+		ticketService.purchaseTickets(accountId, request);
+		verify(seatReservationService).reserveSeat(accountId, 1);
+	}
+
+	@Test
+	public void testAdultAndInfantReserveOneSeat() {
+		Long accountId = 123L;
+		TicketTypeRequest adultRequest = new TicketTypeRequest(Type.ADULT, 1);
+		TicketTypeRequest infantRequest = new TicketTypeRequest(Type.INFANT, 1);
+		ticketService.purchaseTickets(accountId, adultRequest, infantRequest);
+		verify(seatReservationService).reserveSeat(accountId, 1);
 	}
 
 	@Test
@@ -110,7 +122,7 @@ class TicketServiceTest {
 			ticketService.purchaseTickets(accountId, request);
 		});
 	}
-	
+
 	@Test
 	public void testAccountIdValidation() {
 		Long accountId = 0L;
